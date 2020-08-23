@@ -16,6 +16,3 @@ def hello_name():
 @app.route('/new_page')
 def new_page():
     return 'It\'s lonely in here.'
-
-if __name__ == "__main__":
-    app.run(debug=True)
