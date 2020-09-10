@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Admin login
+{% endblock %}
+
+{% block main %}
+<form action="/register" method="post" class="needs-validation" novalidate id="form">
+    <div class="card col-md-6 col-lg-6 mx-auto p-0">
+        <div class="card-header">
+            <span class="navbar-brand font-weight-bold">Sign up for RYM</span><br>
+        </div>
+        <div class="card-body text-center">
+            <div class="form-group">
+                <label for="answer">Roll Number/Username</label>
+                <input type="text" class="form-control" autofocus autocomplete="off" name="answer" id="answer" placeholder="190XXX/username" required aria-describedby="helpline">
+                <!--<small id="helpline">
+                    Enter your IIT-K Roll Number or Username.
+                </small>-->
+                <div class="valid-feedback">
+                    Continuing as <var id="name"></var>.
+                </div>
+                <div class="invalid-feedback">
+                    Invalid Roll number or Username!
+                </div>
+            </div>
+            <div>
+                <input type="text" id="username" name="username" hidden>
+            </div>
+            <div>
+                <input type="submit" class="btn btn-block btn-primary" id="submit_button_1" value="Get OTP!">
+            </div>
+            <div class="form-inline p-0">
+                <hr align="left" width="43%"><span class="text-dark text-monospace">or</span><hr align="right" width="43%">
+            </div>
+            <div class="text-center p-0">
+                <a href="/log_in" class="btn btn-block btn-success">Log In</a>
+            </div>
+        </div>
+        <div class="card-footer text-center text-dark">
+            Having issues? <a href="contact_us">Contact us!</a>
+        </div>
+    </div>
+</form>
+
+<script>
+    let answer = document.getElementById('answer');
+    
+    document.getElementById('form').addEventListener("submit", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $.get('/check?answer=' + answer.value, function (data) {
+            if (data === "false")
+            {
+                document.getElementById('answer').setCustomValidity("Invalid!");
+                document.getElementById('form').classList.add('was-validated');
+                document.getElementById('answer').classList.add('swing');
+                setTimeout(() => {
+                    document.getElementById('answer').classList.remove('swing');
+                }, 600);
+            }
+            else
+            {
+                document.getElementById('answer').setCustomValidity("");
+                document.getElementById('name').innerText = data[0];
+                document.getElementById('username').value = data[1];
+                form.classList.add('was-validated');
+                document.getElementById('form').submit();
+            }
+        });
+        
+    });
+    
+    
+</script>
+
+{% endblock %}
