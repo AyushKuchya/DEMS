@@ -15,10 +15,10 @@
                 <label for="answer">Email ID</label>
                 <input type="text" class="form-control" autofocus autocomplete="off" name="answer" id="answer" placeholder="someone@example.com" required aria-describedby="helpline">
                 <div class="valid-feedback">
-                    Continuing as <var id="name"></var>.
+                    Continuing...
                 </div>
                 <div class="invalid-feedback">
-                    Invalid Roll number or Username!
+                    Invalid Email address
                 </div>
             </div>
             <div>
@@ -38,5 +38,32 @@
             Having issues? <a href="contact_us">Contact us!</a>
         </div>
     </div>
+
+    <script>
+        function validateEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+        let email = document.getElementById('answer');
+        
+        document.getElementById('form').addEventListener('submit', function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+
+            if (validateEmail(email.value))
+            {
+                document.getElementById('answer').setCustomValidity("");
+                document.getElementById('form').classList.add('was-validated');
+                document.getElementById('form').submit();
+            }
+            else
+            {
+                document.getElementById('answer').setCustomValidity("invalid");
+                document.getElementById('form').classList.add('was-validated');
+            }
+
+        })
+    </script>
 </form>
 {% endblock %}
