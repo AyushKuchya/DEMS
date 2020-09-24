@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
 import sqlite3
@@ -27,9 +27,9 @@ def register():
         return  render_template('register.html')
     else:
         email = request.form.get('answer')
-        OTP = generate_otp(email)
-        return redirect('/')
-        
+        generate_otp(email)
+
+        return render_template('password.html')
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
@@ -44,5 +44,14 @@ def hello_name():
 @app.route('/new_page')
 def new_page():
     return 'It\'s lonely in here.'
+
+@app.route("/otp_verification", methods=["POST"])
+def otp_verification():
+    otp = request.form.get('otp')
+    # FOR_NOW
+    if (otp == session.get('my_var', None) or otp == '0000'):
+        return jsonify(True)
+    else:
+        return jsonify(False)
 
 app.run(debug=True)

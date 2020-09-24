@@ -2,10 +2,6 @@ import random
 import smtplib
 from flask import redirect, render_template, request, session
 
-def hello():
-    return "Hello World"
-
-
 def generate_otp(email, message = None):
     if not message:
         # Generating OTP & storing it's value and message
