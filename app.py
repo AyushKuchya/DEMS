@@ -16,34 +16,66 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    
+
     if request.method == 'GET':
-        return  render_template('register.html')
+        return render_template('register.html')
     else:
         email = request.form.get('answer')
         generate_otp(email)
+        session['email'] = email
 
         return render_template('password.html')
+
+
+@app.route('/Company_Profile', methods=['GET', 'POST'])
+def company_profile():
+
+    if not session:
+        return redirect('/')
+
+    if request.method == 'GET':
+        return render_template('Company_Profile.html')
+
+    return request.form.get('a')
+    
+
+@app.route('/password', methods=['POST'])
+def password():
+    password = request.form.get('password')
+    confirmation = request.form.get('confirmation')
+
+    if password != confirmation:
+        return "ERROR!" #FOR_NOW
+
+    session['password'] = password #FOR_NOW
+
+    return redirect('/Company_Profile')
+
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'GET':
         return render_template('admin_login.html')
 
+
 @app.route('/hello_name')
 def hello_name():
     name = request.args.get('name')
     return f'Hello {name}!' if name else 'Hello World'
 
+
 @app.route('/new_page')
 def new_page():
     return 'It\'s lonely in here.'
+
 
 @app.route("/otp_verification", methods=["POST"])
 def otp_verification():
@@ -53,5 +85,6 @@ def otp_verification():
         return jsonify(True)
     else:
         return jsonify(False)
+
 
 app.run(debug=True)
