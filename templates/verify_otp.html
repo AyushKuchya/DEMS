@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<form method="POST" class="needs-validation" novalidate id="form_otp">
+    <div class="card text-center col-md-6 col-lg-6 mx-auto p-0 border border-dark" id='otp_verification'>
+        <div class="card-header text-left">
+            <span class="navbar-brand">
+                Enter the OTP
+            </span>
+        </div>
+        <div class="card-body mx-auto">
+            <div class="form-group">
+                <input type="text" class="form-control" autocomplete="off" name="otp" id="otp" placeholder="XXXX" autofocus required>
+                <span style="font-size: 10px;" id="otp_help">The desired otp has been sent to your Email address. <br> Make sure to check the junk folder.</span>
+                <div class="invalid-feedback">
+                    Invalid OTP! <br> You have <var id="tries"></var> tries left.
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-block btn-primary" id="submit_button_2">Submit</button>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="text-muted">
+                Just one more click to go!
+            </span>
+        </div>
+    </div>
+</form>
+
+<p id="test">
+
+</p>
+    
+<script>
+    let x = 3;
+    document.getElementById('form_otp').addEventListener("submit", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        let otp = document.getElementById('otp');
+        $.post("/otp_verification",
+                { otp : otp.value },
+                function (data) {
+                    if (!data)
+                    {
+                        x--;
+                        document.getElementById('tries').innerText = String(x);
+                        document.getElementById('otp_help').style.display="none";
+                        otp.setCustomValidity('Invalid');
+                        otp.classList.add('swing');
+                        setTimeout(() => {
+                            otp.classList.remove('swing');
+                        }, 600);
+                        otp.classList.add('shrink');
+                        document.getElementById('form_otp').classList.add('was-validated');
+                        if (x == 0)
+                        {
+                            setTimeout(() => {
+                                window.history.back();    
+                            }, 500);
+                        }
+                    }
+                    else {
+                        document.getElementById('form_otp').submit()
+                    }
+                });
+    });
+
+</script>
+{% endblock %}
