@@ -120,7 +120,7 @@ def admin_login():
     password = request.form.get('password')
 
     with conn:
-        company = db.execute("SELECT * FROM 'Profiles' WHERE email = email", #; DELETE ALL DATABASE
+        company = db.execute("SELECT * FROM 'Profiles' WHERE email = :email",
                                 {'email' : email}).fetchall()
     if len(company) != 1:
         return redirect('/admin_login')
@@ -130,8 +130,9 @@ def admin_login():
     if company[4] != password:
         return "Password"
     
-    else:
-        return "YAYYYYYYYyy"
+    session["user_id"] = email
+
+    return redirect('/')
 
     
 
