@@ -5,22 +5,53 @@
 {% endblock %}
 
 {% block main %}
-<form  method="post" class="needs-validation" novalidate id="form-profile">
+<form class="needs-validation" novalidate id="form_password">
     <div id="set_password" class="card col-md-6 col-lg-6 mx-auto p-0 border border-dark">
+        <div class="card-header bg-primary">
+            <span style="align-content: center;">Set your password.</span>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="password">Create a password</label>
+                <input type="password" class="form-control" autocomplete="off" id="password" name="password" required aria-describedby="password-help"> 
+                <small id="password-help">Make sure to use a good password</small>
+                <div class="invalid-feedback">
+                    Make sure you've entered a valid password.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirmation">Enter password again.</label>
+                <input type="password" class="form-control" autocomplete="off" id="confirmation" name="confirmation" required aria-describedby="confirmation-help">
+                <div class="valid-feedback">
+                    Passwords match!
+                </div>
+                <div class="invalid-feedback">
+                    Passwords don't match.
+                </div>
+            </div>
+            <div>
+                <button id="password_button" class="btn btn-outline-success float-right" type="submit">Continue!</button>
+            </div>
+        </div>
+    </div>
+</form>
+<form method="POST" class="needs-validation hidden" novalidate id="form_profile">
+    <div id="set_profile" class="card col-md-6 col-lg-6 mx-auto p-0 border border-dark">
         <div class="card-header bg-primary">
             <h2>Company Profile</h2>
         </div>
         <div class="card-body">
+            <input type="password" name="password1" id="password1" readonly required hidden>
             <div class="form-group">
                 <label for="company-name">Company Name</label>
-                <input type="text" class="form-control" autocomplete="off" id="company-name" name="company-name" required aria-describedby="name_help" placeholder="Enter your company name"> 
+                <input type="text" class="form-control" autocomplete="off" id="company-name" name="company-name" autofocus required aria-describedby="name_help" placeholder="Enter your company name"> 
                 <div class="invalid-feedback">
                     Please enter a valid name.
                 </div>
             </div>
             <div class="form-group form-inline">
                 <label class="my-1 mr-2" for="company-number">Telephone number</label>
-                <input type="number" class="form-control col-5" autocomplete="off" id="company-number" name="company-name" required aria-describedby="confirmation-help" placeholder=>
+                <input type="number" class="form-control col-5" autocomplete="off" id="company-number" name="company-number" required aria-describedby="confirmation-help" placeholder=>
                 <div class="invalid-feedback">
                     Please enter a valid Telephone number.
                 </div>
@@ -40,7 +71,48 @@
 </p>
     
 <script>
+    password = document.getElementById('password');
+    confirmation = document.getElementById('confirmation');
+    pass_match = false;
 
+    confirmation.onkeyup = function password_match() {
+        if (password.value === confirmation.value)
+        {
+            confirmation.setCustomValidity("");
+            pass_match = true;
+
+        }
+        else if (password.value === '')
+        {
+            pass_match = false;
+            password.setCustomValidity();
+        }
+        else
+        {
+            confirmation.setCustomValidity("Passwords don't match");
+            pass_match = false;
+        }
+    };
+    document.getElementById('form_password').addEventListener("submit", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (pass_match)
+        {
+            document.getElementById('form_password').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('form_profile').classList.remove('hidden');
+                document.getElementById('form_profile').classList.add('visible');
+            }, 1000);
+        }
+        document.getElementById('form_password').classList.add('was-validated');
+    });
+
+    document.getElementById('form_profile').addEventListener('submit', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        document.getElementById('password1').value = document.getElementById('password').value;
+        document.getElementById('form_profile').submit();
+    });
 
 </script>
 {% endblock %}

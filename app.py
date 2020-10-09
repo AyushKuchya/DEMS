@@ -7,6 +7,11 @@ import smtplib
 
 app = Flask(__name__)
 
+# Connecting to database
+conn = sqlite3.connect("companies.db", check_same_thread=False)
+db = conn.cursor()
+columns = ['Email', 'Company Name', 'Company Number', 'Company Address', 'password']
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -17,6 +22,18 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 
+# SQLite functions
+def add_to_table(dictionay):
+    dictionay = dict(dictionay)
+    key = tuple(dictionay.keys())
+    value = tuple(dictionay.values())
+
+    with conn:
+        db.execute("INSERT INTO 'Profiles' " + str(key) + " VALUES " + str(value))
+
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
@@ -25,6 +42,8 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
+    session.clear()
+
     if request.method == 'GET':
         return render_template('register.html')
     else:
@@ -32,38 +51,95 @@ def register():
         generate_otp(email)
         session['email'] = email
 
-        return render_template('password.html')
+        return redirect('/verify_otp')
+    
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    if request.method == 'GET':
+        return render_template('verify_otp.html')
+    else:
+        return redirect('/Company_Profile')
+
 
 
 @app.route('/Company_Profile', methods=['GET', 'POST'])
 def company_profile():
 
+
     if not session:
-        return redirect('/')
+        return redirect('/register')
 
     if request.method == 'GET':
         return render_template('Company_Profile.html')
 
-    return request.form.get('a')
+    company_details = [None] * 5
+
+    company_details[0] = session['email']
+    company_details[1] = request.form.get('company-name')
+    company_details[2] = request.form.get('company-number')
+    company_details[3] = request.form.get('company-address')
+    company_details[4] = request.form.get('password1')
+
+    adding_dictionary = {columns[i] : company_details[i] for i in range(5)}
+
+    add_to_table(adding_dictionary)
     
 
-@app.route('/password', methods=['POST'])
-def password():
-    password = request.form.get('password')
+    return redirect('/')
+    
+
+@app.route('/password', methods=['GET', 'POST'])
+def pass_set():
+
+    if request.method == 'GET':
+        return render_template('password.html')
+
+    pass1 = request.form.get('password')
     confirmation = request.form.get('confirmation')
 
-    if password != confirmation:
+    if pass1 != confirmation:
         return "ERROR!" #FOR_NOW
-
-    session['password'] = password #FOR_NOW
+    
+    session['password'] = pass1
+    
 
     return redirect('/Company_Profile')
 
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
+
+    session.clear()
+
     if request.method == 'GET':
         return render_template('admin_login.html')
+
+
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    with conn:
+        company = db.execute("SELECT * FROM 'Profiles' WHERE email = :email",
+                                {'email' : email}).fetchall()
+    if len(company) != 1:
+        return redirect('/admin_login')
+    
+    company = company[0]
+
+    if company[4] != password:
+        return "Password"
+    
+    session["user_id"] = email
+
+    return redirect('/')
+
+    
+
+
+
+
+    
 
 
 @app.route('/hello_name')
@@ -86,5 +162,5 @@ def otp_verification():
     else:
         return jsonify(False)
 
-
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)

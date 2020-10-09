@@ -11,4 +11,8 @@
     <a href="/admin_login" type="button" class="btn btn-primary">Admin login</a>
     <a href="/register" type="button" class="btn btn-primary">Admin Register</a>
 
+    {% if session.get('user_id') %}
+        <p>LOgged in hai</p>
+    {% endif %}
+
 {% endblock %}
