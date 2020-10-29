@@ -1,7 +1,7 @@
 import sqlite3
 
 
-conn = sqlite3.connect('companies.db')
+conn = sqlite3.connect('database/companies.db')
 db = conn.cursor()
 
 
