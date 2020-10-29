@@ -13,7 +13,7 @@
         <div class="card-body">
             <div class="form-group">
                 <label for="password">Create a password</label>
-                <input type="password" class="form-control" autocomplete="off" id="password" name="password" required aria-describedby="password-help"> 
+                <input type="password" class="form-control" autocomplete="off" autofocus id="password" value="123" name="password" required aria-describedby="password-help"> 
                 <small id="password-help">Make sure to use a good password</small>
                 <div class="invalid-feedback">
                     Make sure you've entered a valid password.
@@ -21,7 +21,7 @@
             </div>
             <div class="form-group">
                 <label for="confirmation">Enter password again.</label>
-                <input type="password" class="form-control" autocomplete="off" id="confirmation" name="confirmation" required aria-describedby="confirmation-help">
+                <input type="password" class="form-control" autocomplete="off" id="confirmation" value="123" name="confirmation" required aria-describedby="confirmation-help">
                 <div class="valid-feedback">
                     Passwords match!
                 </div>
@@ -44,21 +44,21 @@
             <input type="password" name="password1" id="password1" readonly required hidden>
             <div class="form-group">
                 <label for="company-name">Company Name</label>
-                <input type="text" class="form-control" autocomplete="off" id="company-name" name="company-name" autofocus required aria-describedby="name_help" placeholder="Enter your company name"> 
+                <input type="text" class="form-control" autocomplete="off" value="Ayush Ltd." id="company-name" name="company-name" autofocus required aria-describedby="name_help" placeholder="Enter your company name"> 
                 <div class="invalid-feedback">
                     Please enter a valid name.
                 </div>
             </div>
             <div class="form-group form-inline">
                 <label class="my-1 mr-2" for="company-number">Telephone number</label>
-                <input type="number" class="form-control col-5" autocomplete="off" id="company-number" name="company-number" required aria-describedby="confirmation-help" placeholder=>
+                <input type="number" class="form-control col-5" autocomplete="off" id="company-number" value="9876543210" name="company-number" required aria-describedby="confirmation-help" placeholder=>
                 <div class="invalid-feedback">
                     Please enter a valid Telephone number.
                 </div>
             </div>
             <div class="form-group">
                 <label for="company-address">Address</label>
-                <textarea type="textarea" class="form-control" name="company-address" autocomplete="off" id="company-address"></textarea>
+                <textarea type="textarea" class="form-control" name="company-address" autocomplete="off" value="Some random bullshit address." id="company-address"></textarea>
             </div>
             <div>
                 <button class="btn btn-block btn-success" type="submit">Save</button>
@@ -102,6 +102,7 @@
             setTimeout(() => {
                 document.getElementById('form_profile').classList.remove('hidden');
                 document.getElementById('form_profile').classList.add('visible');
+                document.getElementById('company-name').focus();
             }, 1000);
         }
         document.getElementById('form_password').classList.add('was-validated');
