@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add Department
+{% endblock %}
+
+{% block main %}
+<form method="POST" class="needs-validation" novalidate id="form_Department">
+    <div class="card col-md-6 col-lg-6 mx-auto p-0">
+        <div class="card-header text-center text-white bg-dark">
+            <h5>Add a new Department</h5>
+        </div>
+        <div class="card-body p-3">
+            <div class="form-inline">
+                <label for="code"><b>code: &nbsp;</b></label><br>
+                <input type="number" autocomplete="off" autofocus id="code" name="code" required
+                    class="form-control needs-validation p-2">
+                <div class="invalid-feedback">
+                    Please enter a code.
+                </div>
+            </div><br>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="Manager ID">Manager ID</label>
+                    <input type="number" class="form-control needs-validation" id="Manager ID" required name="Manager ID">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="Name"> Name</label>
+                    <input type="text" class="form-control needs validation" id="Name" name="Name">
+                </div>
+
+            </div>
+            <input type="text" name="method_" id="method_" hidden readonly>
+            <div>
+                <button onclick="method_to_move(1)" type="submit" class="btn btn-block btn-success">Save and add
+                    another!</button>
+            </div>
+            <div class="form-inline">
+                <hr align="left" width="43%"><span class="text-dark text-monospace"></span>
+                <hr align="right" width="43%">
+            </div>
+ 
+            <a href="/exit" type="button" class="btn btn-danger">Exit!</a>
+        </div>
+    </div>
+</form>
+<p id="test"></p>
+
+
+{% endblock %}

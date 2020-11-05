@@ -221,8 +221,20 @@ def logout():
     session.clear()
     return redirect('/')
 
+@app.route('/exit')
+def exit():
+    return redirect('/')
+    
+@app.route('/add_department', methods=['GET', 'POST'])
+def add_department():
+    if request.method == 'GET':
+        return render_template('add_department.html')
 
 
+@app.route('/add_project', methods=['GET', 'POST'])
+def add_project():
+    if request.method == 'GET':
+        return render_template('add_project.html')
     
 
 
