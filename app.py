@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
 import sqlite3
-from dbms import generate_otp, login_required
+from datetime import datetime as dt, timedelta
+from dbms import generate_otp, login_required, admin_login_required
 import smtplib
+from os.path import isfile
 
 app = Flask(__name__)
 
@@ -14,7 +16,8 @@ company_profile_ = sqlite3.connect("database/companies.db", check_same_thread=Fa
 companies_db = company_profile_.cursor()
 columns = ['Email', 'Company Name', 'Company Number', 'Company Address', 'password']
 employee_columns = ['EmployeeID', 'FName', 'LName', 'email', 'DeptCode', 'Salary', 'JoinDate']
-
+department_columns = ['Code', 'Name', 'ManagerID']
+project_columns = ['ProjectID', 'Description', 'StartDate', 'DueDate', 'DeptCode']
 
 
 # Ensure templates are auto-reloaded
@@ -28,19 +31,23 @@ Session(app)
 
 
 # SQLite functions
-def add_to_table(table, dictionay, database, cursor):
+def add_to_table(table, dictionay, database):
     dictionay = dict(dictionay)
     key = tuple(dictionay.keys())
     value = tuple(dictionay.values())
 
     with database:
-        cursor.execute("INSERT INTO" + f" '{table}' " + str(key) + " VALUES " + str(value))
+        database.cursor().execute("INSERT INTO" + f" '{table}' " + str(key) + " VALUES " + str(value))
 
 
-def check_tables():
-    id_ = session.get('user_id')
+def check_tables(id_, admin=True):
+
+    if not admin:
+        if not isfile('database/' + id_ + '.db'):
+            return False
 
     global company, company_db
+
 
     company = sqlite3.connect('database/' + id_ + '.db', check_same_thread=False)
     company_db = company.cursor()
@@ -75,8 +82,10 @@ def check_tables():
                 'EID' integer NOT NULL,
                 'PID' integer NOT NULL,
                 FOREIGN KEY('EID') REFERENCES Employee('EmployeeID'),
-                FOREIGN KEY('PID') REFERENCES Project('ProjectID')
+                FOREIGN KEY('PID') REFERENCES Project('ProjectID'),
+                UNIQUE(EID, PID)
             )""")
+    return True
             
 
 
@@ -133,9 +142,9 @@ def company_profile():
 
     session['user_id'] = session['email'].split('@')[0]
 
-    check_tables()
+    check_tables(session.get('user_id'))
 
-    add_to_table('Profiles', adding_dictionary, company_profile_, companies_db)
+    add_to_table('Profiles', adding_dictionary, company_profile_)
     
 
     return redirect('/')
@@ -165,7 +174,7 @@ def admin_login():
     session.clear()
 
     if request.method == 'GET':
-        return render_template('admin_login.html')
+        return render_template('admin_login.html', admin=True)
 
 
     email = request.form.get('email')
@@ -183,15 +192,16 @@ def admin_login():
         return "Password"
     
     session["user_id"] = email.split('@')[0]
+    session["admin_login"] = True
 
-    check_tables()
+    check_tables(session.get('user_id'))
 
 
     return redirect('/')
 
     
 @app.route('/add_employee', methods=['GET', 'POST'])
-@login_required
+@admin_login_required
 def add_employee():
     
     if request.method == 'GET':
@@ -210,32 +220,115 @@ def add_employee():
 
         adding_dictionary = {column : detail for column, detail in zip(employee_columns, employee_details)}
 
-        add_to_table('Employee', adding_dictionary, company, company_db)
+        add_to_table('Employee', adding_dictionary, company)
 
 
         return redirect('/add_employee') if int(request.form.get('method_')) else redirect('/')
 
-@app.route('/logout')
-@login_required
-def logout():
-    session.clear()
-    return redirect('/')
-
-@app.route('/exit')
-def exit():
-    return redirect('/')
     
 @app.route('/add_department', methods=['GET', 'POST'])
+@admin_login_required
 def add_department():
     if request.method == 'GET':
         return render_template('add_department.html')
+    else:
+        add_to_table('Department', {column : request.form.get(column) for column in department_columns}, company)
+        return redirect('/')
 
 
 @app.route('/add_project', methods=['GET', 'POST'])
+@admin_login_required
 def add_project():
     if request.method == 'GET':
         return render_template('add_project.html')
+    else:
+        add_to_table('Project', {column : request.form.get(column) for column in project_columns}, company)
+
+        return redirect('/')
+
+
+@app.route('/search_employee')
+def search_employee():
+    answer = request.args.get('answer')
+    info = company_db.execute('SELECT EmployeeID, FName, LName FROM Employee').fetchall()
+    info = [inf for inf in info if str(inf[0]).startswith(answer)]
     
+    return render_template('search.html', info=info)
+
+
+@app.route('/assign_project', methods=['GET', 'POST'])
+@admin_login_required
+def assign_project():
+    if request.method == 'GET':
+        return render_template('assign_project.html')
+    else:
+        project_id, *employees_list = request.form.get('assigned_employees').split(' ')
+        previous_employees = company_db.execute("SELECT EID FROM WorksOn WHERE PID = :id", {'id' : project_id}).fetchall()
+        previous_employees = set([str(emp[0]) for emp in previous_employees])
+        for employee in previous_employees - set(employees_list):
+            with company:
+                company_db.execute("DELETE FROM WorksOn WHERE EID = :eid AND PID = :pid", {'eid' : employee, 'pid' : project_id})
+        employees_list = set(employees_list) - previous_employees
+        for employee in employees_list:
+            adding_dictionary = {column : value for column, value in zip(['EID', 'PID'], [employee, project_id])}
+            add_to_table('WorksOn', adding_dictionary, company)
+        return redirect('/assign_project')
+
+
+@app.route('/project_details')
+@admin_login_required
+def project_details():
+    id_ = request.args.get('id')
+    rows = company_db.execute("SELECT * FROM Project WHERE ProjectID = :id_", {'id_' : id_}).fetchall()
+    employees_list = company_db.execute("SELECT EID FROM WorksOn WHERE PID = :id_", {'id_' : id_}).fetchall()
+    employees = []
+    for employee in employees_list:
+        values = company_db.execute("SELECT FName, LName FROM Employee WHERE EmployeeID = :id_", {'id_' : employee[0]}).fetchall()[0]
+        employees.append((employee[0], values[0] + ' ' + values[1]))
+    if not len(rows):
+        return jsonify(False)
+    else:
+        return jsonify([{column : value for column, value in zip(project_columns, rows[0])}, employees])
+    
+
+@app.route('/employee_login', methods=['GET', 'POST'])
+def employee_login():
+    if request.method == 'GET':
+        return render_template('admin_login.html', admin=False)
+    else:
+        if not check_tables(request.form.get('company').split('@')[0], admin=False):
+            return "Invalid Company" # For_Now
+        else:
+            rows = company_db.execute('SELECT * FROM Employee WHERE EmployeeID = :id AND Email = :email',
+                                    {'id' : request.form.get('password'), 'email' : request.form.get('email')}).fetchall()
+            if not len(rows):
+                return "No Employee Found" # For_Now
+            else: rows=rows[0]
+            session['user_id'] = rows[0]
+            session['admin_login'] = False
+        return redirect('/')
+
+@app.route('/view_projects')
+@login_required
+def view_projects():
+    projects = list()
+    employee = company_db.execute('SELECT FName, LName FROM Employee WHERE EmployeeID = :id', {'id' : session.get('user_id')}).fetchall()
+    PIDs = company_db.execute('SELECT PID FROM WorksOn WHERE EID = :id', {'id' : session.get('user_id')})
+    PIDs = [id_[0] for id_ in PIDs]
+    for id_ in PIDs:
+        project = list(company_db.execute('SELECT ProjectID, Description, StartDate, DueDate, DeptCode FROM Project WHERE ProjectID = :id', {'id' : id_}).fetchall()[0])
+        project.append(True if dt.strptime(project[3], '%Y-%m-%d') > timedelta(days=7) + dt.now() else False)
+        projects.append(project)
+        
+    
+    return render_template('projects.html', employee=employee[0], projects=projects)
+
+
+@app.route('/logout')
+@admin_login_required
+def logout():
+    session.clear()
+    return redirect('/')
 
 
 @app.route('/hello_name')

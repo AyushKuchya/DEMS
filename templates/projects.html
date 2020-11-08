@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add Project
+{% endblock %}
+
+{% block main %}
+<div class="card mx-auto p-2">
+    <div class="card-header text-center text-white bg-dark">
+        <h5>Projects for {{ employee[0] }} {{ employee[1] }}</h5>
+    </div>
+    <div class="card-body p-3">
+        {% for project in projects %}
+            <div class="card mx-auto p-0">
+                <div class="card-header bg-info">
+                    <span class="card-title">Project ID #{{ project[0] }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="alert alert-primary">{{ project[1] }}</p>
+
+                    <span><strong>Start Date:</strong> {{ project[2] }}</span> &nbsp;
+                    <span><strong>Due Date:</strong> <span class="badge badge-pill {% if not project[5] %} badge-danger {% else %} badge-success {% endif %}">{{ project[3] }}</span></span><br>
+                </div>
+            </div><br>
+        {% endfor %}
+        
+        
+
+    </div>
+</div>
+<p id="test"></p>
+
+<script>
+    
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

@@ -27,6 +27,21 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            return redirect("/admin_login")
+            return redirect("/employee_login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_login_required(f):
+    """
+    Decorate routes to require login.
+
+    http://flask.pocoo.org/docs/1.0/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/log_in")
+        elif not session.get("admin_login"):
+            return "You Don't Have permission to view this page"
         return f(*args, **kwargs)
     return decorated_function
