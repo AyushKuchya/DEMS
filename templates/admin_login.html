@@ -23,14 +23,14 @@
             
             <div class="form-group">
                 <label for="email"><span style="text-decoration: solid;">Email</span></label><br>
-                <input type="text" autocomplete="off" autofocus id="email" {% if not admin %} value="abaderia31@gmail.com" {% endif %} name="email" placeholder="someone@example.com" class="form-control">
+                <input type="text" autocomplete="off" autofocus id="email" required  name="email" placeholder="someone@example.com" class="form-control">
                 <div class="invalid-feedback">
                     Please enter a email.
                 </div>
             </div>
             <div class="form-group">
                 <label for="password"><span>Password</span></label><br>
-                <input type="password" autocomplete="off" autofocus id="password" {% if not admin %} value="100000" {% endif %} name="password" class="form-control">
+                <input type="password" autocomplete="off" autofocus id="password" required name="password" class="form-control">
                 <div class="valid-feedback">
                     Welcome back, <var id="company_name_var"></var>!
                 </div>

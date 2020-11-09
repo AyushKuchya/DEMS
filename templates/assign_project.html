@@ -47,7 +47,7 @@ Assign Projects
             </div>
             <div class="form-group">
                 <label for="answer">Add Employees</label><br>
-                <input type="text" class="col-4 col-md2 mb2" list="employee_list" name="answer" id="add_employee" onkeyup="search()" autocomplete="off" placeholder="Enter their name or ID">
+                <input type="text" class="col-4 col-md2 mb2" list="employee_list" name="answer" id="add_employee" onkeyup="search()" autocomplete="off" placeholder="Enter their ID">
                 <datalist id="employee_list"></datalist>
                 <!--<button class="btn btn-success text-right" type="submit">Add Employees!</button>-->
             </div>
@@ -76,6 +76,7 @@ Assign Projects
         $.get('/project_details?id=' + id.value, (data) => {
             if (!data) {
                 alert('No Such Project ID');
+                id.value = '';
             }
             else {
                 document.getElementById('project_details').style.display = "";
@@ -87,9 +88,8 @@ Assign Projects
                 document.getElementById('assigned_employees').value = data[0]['ProjectID'];
             }
             var employees = document.getElementById('employees');
-            while (employees.firstChild) {
-                employees.removeChild(employees.firstChild);
-            }
+            employees.innerHTML = '';
+            console.log(data[1].length);
             if (data[1].length > 0) {
                 document.getElementsByTagName('form')[0].classList.remove('hidden');
                 
@@ -126,7 +126,6 @@ Assign Projects
     
     function search()
     {
-        document.getElementById('test').innerHTML = '';
         var employees = document.getElementById('employees');
         input = document.getElementById('add_employee');
         var employee_list = document.getElementById('employee_list');
@@ -134,20 +133,22 @@ Assign Projects
                 employee_list.innerHTML = data;
             });
         setTimeout(() => {
-            var can = true;
             var options = employee_list.options;
             if (options.length == 1) {
                 Array.prototype.filter.call(document.getElementsByClassName('alert'), (element) => {
-                    if (element.getAttribute('data-employee-id') == options[0].value) can = false;
+                    if (element.getAttribute('data-employee-id') == options[0].value) {
+                        input.value = '';
+                        employee_list.removeChild(options[0]);
+                        alert('Employee already assigned');
+                        return;
+                    }
                 });
-                if (can) {
-                    var division = create_employee(options[0].innerHTML, options[0].value);
-                    
-                    employees.appendChild(division);
-                    input.value = '';
-                    employee_list.removeChild(options[0]);
-                    if (employees.children.length == 1) document.getElementsByTagName('form')[0].classList.remove('hidden');
-                }
+                var division = create_employee(options[0].innerHTML, options[0].value);
+                
+                employees.appendChild(division);
+                input.value = '';
+                employee_list.removeChild(options[0]);
+                if (employees.children.length == 1) document.getElementsByTagName('form')[0].classList.remove('hidden');
                 
             } 
         }, 100);

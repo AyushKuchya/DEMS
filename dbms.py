@@ -40,7 +40,7 @@ def admin_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            return redirect("/log_in")
+            return redirect("/admin_login")
         elif not session.get("admin_login"):
             return "You Don't Have permission to view this page"
         return f(*args, **kwargs)

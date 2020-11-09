@@ -19,7 +19,7 @@ Add Project
                     <p class="alert alert-primary">{{ project[1] }}</p>
 
                     <span><strong>Start Date:</strong> {{ project[2] }}</span> &nbsp;
-                    <span><strong>Due Date:</strong> <span class="badge badge-pill {% if not project[5] %} badge-danger {% else %} badge-success {% endif %}">{{ project[3] }}</span></span><br>
+                    <span><strong>Due Date:</strong> <span class="badge badge-pill {% if project[5] %} badge-success {% else %} badge-danger {% endif %}">{{ project[3] }}</span></span><br>
                 </div>
             </div><br>
         {% endfor %}

@@ -9,17 +9,15 @@
         front page banana hai
     </p>
     {% if session.get('user_id') %}
-        {% if admin %}
+        {% if session.get('admin_login') %}
             <a href="/add_employee" type="button" class="btn btn-primary">Add Employee!</a>
             <a href="/add_department" type="button" class="btn btn-primary">Add Deptartment!</a>
             <a href="/add_project" type="button" class="btn btn-primary">Add Project!</a>
             <a href="/assign_project" type="button" class="btn btn-primary">Assign Project!</a>
         {% else %}
             <a href="/view_projects" type="button" class="btn btn-primary">View Projects!</a>
-            
         {% endif %}
-            
-            <a href="/logout" type="button" class="btn btn-danger">Log Out!</a>
+        <a href="/logout" type="button" class="btn btn-danger">Log Out!</a>
     {% else %}
         <a href="/employee_login" type="button" class="btn btn-primary">Employee Login</a>
         <a href="/admin_login" type="button" class="btn btn-primary">Admin login</a>

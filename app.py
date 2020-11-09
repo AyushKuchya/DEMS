@@ -272,7 +272,7 @@ def assign_project():
         for employee in employees_list:
             adding_dictionary = {column : value for column, value in zip(['EID', 'PID'], [employee, project_id])}
             add_to_table('WorksOn', adding_dictionary, company)
-        return redirect('/assign_project')
+        return redirect('/')
 
 
 @app.route('/project_details')
@@ -280,15 +280,14 @@ def assign_project():
 def project_details():
     id_ = request.args.get('id')
     rows = company_db.execute("SELECT * FROM Project WHERE ProjectID = :id_", {'id_' : id_}).fetchall()
+    if not len(rows):
+        return jsonify(False)
     employees_list = company_db.execute("SELECT EID FROM WorksOn WHERE PID = :id_", {'id_' : id_}).fetchall()
     employees = []
     for employee in employees_list:
         values = company_db.execute("SELECT FName, LName FROM Employee WHERE EmployeeID = :id_", {'id_' : employee[0]}).fetchall()[0]
         employees.append((employee[0], values[0] + ' ' + values[1]))
-    if not len(rows):
-        return jsonify(False)
-    else:
-        return jsonify([{column : value for column, value in zip(project_columns, rows[0])}, employees])
+    return jsonify([{column : value for column, value in zip(project_columns, rows[0])}, employees])
     
 
 @app.route('/employee_login', methods=['GET', 'POST'])
@@ -325,7 +324,7 @@ def view_projects():
 
 
 @app.route('/logout')
-@admin_login_required
+@login_required
 def logout():
     session.clear()
     return redirect('/')
