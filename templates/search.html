@@ -1,0 +1,3 @@
+{% for person in info %}
+    <option value="{{ person[0] }}" onclick="test_fun({{ person[0] }})" name="options">{{ person[1] }} {{ person[2] }}</option>
+{% endfor %}

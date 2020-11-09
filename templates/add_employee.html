@@ -70,7 +70,7 @@ Add Employee
                 <hr align="left" width="43%"><span class="text-dark text-monospace"></span>
                 <hr align="right" width="43%">
             </div>
-            <a href="/exit" type="button" class="btn btn-danger">Exit!</a>
+            <a href="/" type="button" class="btn btn-danger">Exit!</a>
         </div>
     </div>
 </form>
@@ -84,7 +84,7 @@ Add Employee
         window.addEventListener('load', function () {
             var forms = document.getElementsByClassName('needs-validation');
             var validation = Array.prototype.filter.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
+                form.addEventListener('submit', (event) => {
                     if (form.checkValidity() === false) {
                         event.preventDefault();
                         event.stopPropagation();
