@@ -109,7 +109,12 @@ Assign Projects
         division.classList = 'alert alert-primary alert-dismissible fade show';
         division.setAttribute('role', 'alert');
         division.setAttribute('data-employee-id', employee_id);
-        var text = document.createTextNode(employee_name + ' (' + employee_id + ')');
+        var text = document.createTextNode(employee_name);
+        var employee_id_input = document.createElement('input');
+        employee_id_input.setAttribute('readonly', true);
+        employee_id_input.setAttribute('value', employee_id);
+        employee_id_input.setAttribute('name', 'EmployeeID');
+        employee_id_input.classList = 'btn col-2 font-weight-bold';
         var close_button = document.createElement('button');
         close_button.classList.add('close');
         close_button.setAttribute('data-dismiss', 'alert');
@@ -120,6 +125,7 @@ Assign Projects
         times.appendChild(document.createTextNode('\u00d7'));
         close_button.appendChild(times);
         division.appendChild(text);
+        division.appendChild(employee_id_input);
         division.appendChild(close_button);
         return division;
     }
@@ -168,17 +174,6 @@ Assign Projects
             });
         }, false);
     })();
-
-    document.getElementsByTagName('form')[0].addEventListener('submit', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        var employees = document.getElementsByClassName('alert');
-        Array.prototype.filter.call(employees, (employee) => {
-            document.getElementById('assigned_employees').value += ' ' + employee.getAttribute('data-employee-id');
-        });
-        document.getElementsByTagName('form')[0].submit();
-
-    });
 
 </script>
 {% endblock %}

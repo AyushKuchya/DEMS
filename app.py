@@ -92,6 +92,7 @@ def check_tables(id_, admin=True):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+
     return render_template('index.html')
 
 
@@ -233,7 +234,7 @@ def add_department():
         return render_template('add_department.html')
     else:
         add_to_table('Department', {column : request.form.get(column) for column in department_columns}, company)
-        return redirect('/')
+        return redirect('/add_department')
 
 
 @app.route('/add_project', methods=['GET', 'POST'])
@@ -244,7 +245,7 @@ def add_project():
     else:
         add_to_table('Project', {column : request.form.get(column) for column in project_columns}, company)
 
-        return redirect('/')
+        return redirect('/add_project')
 
 
 @app.route('/search_employee')
@@ -262,7 +263,8 @@ def assign_project():
     if request.method == 'GET':
         return render_template('assign_project.html')
     else:
-        project_id, *employees_list = request.form.get('assigned_employees').split(' ')
+        project_id = request.form.get('assigned_employees')
+        employees_list = request.form.getlist('EmployeeID')
         previous_employees = company_db.execute("SELECT EID FROM WorksOn WHERE PID = :id", {'id' : project_id}).fetchall()
         previous_employees = set([str(emp[0]) for emp in previous_employees])
         for employee in previous_employees - set(employees_list):
@@ -273,6 +275,7 @@ def assign_project():
             adding_dictionary = {column : value for column, value in zip(['EID', 'PID'], [employee, project_id])}
             add_to_table('WorksOn', adding_dictionary, company)
         return redirect('/')
+
 
 
 @app.route('/project_details')
@@ -321,6 +324,15 @@ def view_projects():
         
     
     return render_template('projects.html', employee=employee[0], projects=projects)
+
+@app.route('/check_projectid')
+def check_projectid():
+    id_ = request.args.get('id')
+    rows = company_db.execute(f'SELECT ProjectID FROM Project WHERE ProjectID = {id_}').fetchall()
+    return jsonify(False) if not len(rows) else jsonify(True)
+    
+
+
 
 
 @app.route('/logout')
