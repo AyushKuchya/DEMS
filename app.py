@@ -2,8 +2,9 @@ from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
 import sqlite3
+from werkzeug.exceptions import default_exceptions, InternalServerError, HTTPException
 from datetime import datetime as dt, timedelta
-from dbms import generate_otp, login_required, admin_login_required
+from dbms import generate_otp, login_required, admin_login_required, apology
 import smtplib
 from os.path import isfile
 
@@ -355,6 +356,16 @@ def new_page():
     return 'It\'s lonely in here.'
 
 
+def errorhandler(e):
+    """Handle error"""
+    if not isinstance(e, HTTPException):
+        e = InternalServerError()
+    return apology(e.name, e.code)
+
+
+# Listen for errors
+
+
 @app.route("/otp_verification", methods=["POST"])
 def otp_verification():
     otp = request.form.get('otp')
@@ -366,3 +377,5 @@ def otp_verification():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    for code in default_exceptions:
+        app.errorhandler(code)(errorhandler)
