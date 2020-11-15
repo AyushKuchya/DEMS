@@ -90,7 +90,7 @@ def check_tables(id_, admin=True):
 
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
 
     return render_template('index.html')
@@ -142,6 +142,7 @@ def company_profile():
     adding_dictionary = {columns[i] : company_details[i] for i in range(5)}
 
     session['user_id'] = session['email'].split('@')[0]
+    session['admin_login']=True
 
     check_tables(session.get('user_id'))
 
@@ -318,7 +319,9 @@ def view_projects():
     PIDs = company_db.execute('SELECT PID FROM WorksOn WHERE EID = :id', {'id' : session.get('user_id')})
     PIDs = [id_[0] for id_ in PIDs]
     for id_ in PIDs:
-        project = list(company_db.execute('SELECT ProjectID, Description, StartDate, DueDate, DeptCode FROM Project WHERE ProjectID = :id', {'id' : id_}).fetchall()[0])
+        project = list(company_db.execute('SELECT ProjectID, Description, StartDate, DueDate, DeptCode FROM Project WHERE ProjectID = :id', {'id': id_}).fetchall()[0])
+        if dt.strptime(project[3], '%Y-%m-%d') < dt.now():
+            continue
         project.append(True if dt.strptime(project[3], '%Y-%m-%d') > timedelta(days=7) + dt.now() else False)
         projects.append(project)
         
@@ -336,7 +339,6 @@ def check_projectid():
 
 
 @app.route('/logout')
-@login_required
 def logout():
     session.clear()
     return redirect('/')
